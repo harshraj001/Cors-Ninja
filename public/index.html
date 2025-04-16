@@ -1,31 +1,438 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
-	</head>
-	<body>
-		<h1 id="heading"></h1>
-		<button id="button" type="button">Fetch a random UUID</button>
-		<output id="random" for="button"></output>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
-
-			const button = document.getElementById("button");
-			button.addEventListener("click", () => {
-				fetch('/random')
-					.then((resp) => resp.text())
-					.then((text) => {
-						const random = document.getElementById('random');
-						random.textContent = text;
-					});
-			});
-		</script>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Ninja - A Powerful CORS Proxy Service</title>
+    <meta name="description" content="CORS Ninja is a powerful CORS proxy service built with Cloudflare Workers that enables cross-origin requests for any API endpoint.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --primary-dark: #4338CA;
+            --secondary-color: #10B981;
+            --dark-color: #1F2937;
+            --light-color: #F9FAFB;
+            --gray-color: #6B7280;
+            --border-color: #E5E7EB;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        h3 {
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.8rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0.25rem;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        pre, code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #F3F4F6;
+            border-radius: 6px;
+        }
+        
+        pre {
+            padding: 1rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        code {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.9em;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background-color: #0CA678;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #F3F4F6;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #F9FAFB;
+        }
+        
+        .endpoint {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-links a {
+            color: white;
+            margin-right: 1rem;
+            text-decoration: none;
+        }
+        
+        .social-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CORS Ninja</h1>
+            <p>A powerful CORS proxy service built with Cloudflare Workers</p>
+            <div class="badges">
+                <span class="badge">Cross-Origin</span>
+                <span class="badge">API Proxy</span>
+                <span class="badge">Cloudflare Workers</span>
+                <span class="badge">Rate Limiting</span>
+                <span class="badge">Security</span>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <section class="hero-section">
+            <h2>Eliminate CORS Issues Instantly</h2>
+            <p>CORS Ninja is a lightweight, fast, and secure proxy service that enables cross-origin requests to any API endpoint with minimal configuration.</p>
+            <a href="https://github.com/harshraj864869/cors-ninja" class="cta-button">View on GitHub</a>
+        </section>
+        
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Full CORS Support</h3>
+                <p>Enables cross-origin requests for any API endpoint with all HTTP methods (GET, POST, PUT, DELETE, PATCH, OPTIONS).</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Security Features</h3>
+                <p>Origin whitelisting, domain blacklisting, request validation, and header sanitization to keep your proxy secure.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Performance</h3>
+                <p>Response caching, header optimization, and connection pooling for lightning-fast responses from the edge.</p>
+            </div>
+        </section>
+        
+        <section id="usage">
+            <h2>Usage Guide</h2>
+            <p>CORS Ninja proxy service is simple to use. Just prepend your API URL with our service URL, and we'll handle the CORS headers for you.</p>
+            
+            <h3>Endpoints</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="endpoint">/</td>
+                        <td>Service information and documentation links</td>
+                    </tr>
+                    <tr>
+                        <td class="endpoint">/proxy?url=&lt;target-url&gt;</td>
+                        <td>Main proxy endpoint for forwarding requests</td>
+                    </tr>
+                    <tr>
+                        <td class="endpoint">/config</td>
+                        <td>View current configuration</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Basic Example</h3>
+            <p>To proxy a GET request:</p>
+            <pre><code>fetch('https://cors-ninja.harshraj864869.workers.dev/proxy?url=https://api.example.com/data')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));</code></pre>
+            
+            <h3>POST Request Example</h3>
+            <p>To send a POST request through the proxy:</p>
+            <pre><code>fetch('https://cors-ninja.harshraj864869.workers.dev/proxy?url=https://api.example.com/create', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    title: 'My Title',
+    body: 'This is the content',
+    userId: 1
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));</code></pre>
+            
+            <h3>Usage with Axios</h3>
+            <p>You can also use CORS Ninja with Axios:</p>
+            <pre><code>axios.get('https://cors-ninja.harshraj864869.workers.dev/proxy?url=https://api.example.com/data')
+  .then(response => {
+    console.log(response.data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });</code></pre>
+        </section>
+        
+        <section id="configuration">
+            <h2>Configuration</h2>
+            <p>CORS Ninja comes with default configuration settings that work well for most use cases, but you can view the current configuration by visiting:</p>
+            <pre><code>https://cors-ninja.harshraj864869.workers.dev/config</code></pre>
+            
+            <h3>Default Configuration</h3>
+            <pre><code>{
+  "rateLimit": {
+    "requestsPerMinute": 60,
+    "enabled": true
+  },
+  "security": {
+    "allowedOrigins": ["*"],
+    "blockedDomains": [],
+    "enabledHeaderValidation": true,
+    "enabledUrlValidation": true
+  },
+  "cache": {
+    "enabled": true,
+    "maxAgeSeconds": 300
+  },
+  "monitoring": {
+    "enabled": true,
+    "logLevel": "info"
+  }
+}</code></pre>
+        </section>
+        
+        <section id="deployment">
+            <h2>Deploy Your Own Instance</h2>
+            <p>If you'd like to run your own instance of CORS Ninja, follow these steps:</p>
+            
+            <h3>Prerequisites</h3>
+            <ul>
+                <li>Node.js installed</li>
+                <li>Wrangler CLI installed</li>
+                <li>A Cloudflare account</li>
+            </ul>
+            
+            <h3>Deployment Steps</h3>
+            <ol>
+                <li>Clone the repository:
+                    <pre><code>git clone https://github.com/harshraj864869/cors-ninja.git
+cd cors-ninja</code></pre>
+                </li>
+                <li>Install dependencies:
+                    <pre><code>npm install</code></pre>
+                </li>
+                <li>Authenticate with Cloudflare:
+                    <pre><code>npx wrangler login</code></pre>
+                </li>
+                <li>Deploy to Cloudflare Workers:
+                    <pre><code>npm run deploy</code></pre>
+                </li>
+            </ol>
+            
+            <p>Your CORS Ninja proxy will be deployed to a URL like:
+                <code>https://&lt;your-worker-name&gt;.&lt;your-account&gt;.workers.dev</code>
+            </p>
+        </section>
+        
+        <section id="security">
+            <h2>Security Considerations</h2>
+            <p>When using or deploying CORS Ninja, consider the following security best practices:</p>
+            
+            <h3>For Users</h3>
+            <ul>
+                <li>Avoid sending sensitive data through public proxy services</li>
+                <li>Consider deploying your own instance for production use</li>
+                <li>Use HTTPS for all requests</li>
+            </ul>
+            
+            <h3>For Deployers</h3>
+            <ul>
+                <li>Update the <code>allowedOrigins</code> array to limit which origins can use your proxy</li>
+                <li>Add domains to the <code>blockedDomains</code> array to prevent proxying requests to sensitive domains</li>
+                <li>Configure rate limiting to prevent abuse</li>
+                <li>Use Cloudflare's security features for additional protection</li>
+            </ul>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CORS Ninja</h3>
+                    <p>A powerful CORS proxy service built with Cloudflare Workers.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Links</h3>
+                    <p><a href="https://github.com/harshraj864869/cors-ninja" style="color: white;">GitHub Repository</a></p>
+                    <p><a href="https://cors-ninja.harshraj864869.workers.dev" style="color: white;">Live Demo</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>Have questions or feedback? Open an issue on GitHub.</p>
+                    <div class="social-links">
+                        <a href="https://github.com/harshraj864869">GitHub</a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 CORS Ninja by Harsh Raj. Licensed under MIT.</p>
+            </div>
+        </div>
+    </footer>
+</body>
 </html>
